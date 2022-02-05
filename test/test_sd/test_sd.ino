@@ -4,6 +4,7 @@
 const int PIN_CHIP_SELECT = 53;
 
 File tree;
+const char* category_names[3] = {"Деловые", "Полуделовые", "Дровяные"};
 
 void setup() {
   Serial.begin(9600);
@@ -28,7 +29,7 @@ void loop() {
   tree.println("Arduino, file, write");
   tree.println("tree, tree, tree");
   tree.println("metr");
-  
+  tree.println(
   tree.close();
   
   Serial.println("files write");

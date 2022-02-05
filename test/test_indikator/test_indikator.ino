@@ -40,10 +40,8 @@ const int echoPin = 7;
 
 #include <SPI.h>
 #include <SD.h>
-
-const int PIN_CHIP_SELECT = 53;
-
 File tree;
+const int PIN_CHIP_SELECT = 53;
 
 uint32_t dividers[8] = {
   1000,
@@ -67,6 +65,10 @@ int digits[10][8] = {{  44,  42, 40, 36, 33, 31, 0},      //0
 int positions[4] = {
   23, 25, 27, 29
 };
+int count_tree = 0;
+const char* trees_names[19] = {"Сосна", "Ель", "Пихта", "Лиственница", "Кедр", "Береза", "Осина", "Ольха Серая", "Липа", "Ива древовидная", "Ясень", "Клён", "Вяз", "Ильм", "Дуб", "Бук", "Граб", "Ольха черная", "Тополь"};
+const char* category_names[3] = {"Деловые", "Полуделовые", "Дровяные"};
+int num_tree, num_category, next, state, value_mm, data_mm = 0;
 
 int trees[19][4][8] =  {{{0},                          {40, 38, 44, 33, 36, 0},          {44, 42, 40, 36, 33, 31, 0},       {40, 38, 44, 33, 36, 0}},     //SOS - сосна
                         {{0},                          {0},                              {44, 40, 38, 31, 33, 0},           {44, 31, 33,  0}},            //EL - ель
@@ -299,9 +301,21 @@ int get_mm()
   return mm;
 }
 
-void file_write(int mm, int tree, int category)
+void file_write(File tree, int mm, int tree_num, int category)
 {
-  
+  //"NUMBER, MM, TYPE, CATEGORY, TIME"
+  uint8_t oldSREG = SREG;
+  cli();
+  //digitalWrite(led_green,  0);
+  //digitalWrite(led_red,    1);
+  //digitalWrite(led_blue,   0);
+  //digitalWrite(led_yellow, 0);
+  String new_line = String(count_tree) + ", " + String(mm) + ", " + trees_names[tree_num] + ", " + category_names[category];
+  tree.println(new_line);
+  count_tree++;
+  state = GET_MM;
+  SREG = oldSREG;
+  sei();
 }
 
 unsigned long t, pre_millis = 0;
@@ -358,7 +372,7 @@ void setup()
   sei();
   
   pinMode(10, OUTPUT);
-  /* Дописать потом сейчас лень
+  /* Сделать исключительну. ситуацию когда карта не вставлена
   // Пытаемся проинициализировать модуль
   if (!SD.begin(PIN_CHIP_SELECT)) {
     Serial.println("Card failed, or not present");
@@ -367,9 +381,20 @@ void setup()
   }
   Serial.println("card initialized.");
   */
-}
 
-int num_tree, num_category, next, state, value_mm, data_mm = 0;
+  SD.begin(PIN_CHIP_SELECT);
+  if(SD.exists("tree.csv"))
+  {
+    SD.remove("tree.csv");
+    tree = SD.open("tree.csv", FILE_WRITE);
+  }
+  else 
+  {
+    tree = SD.open("tree.csv", FILE_WRITE);
+  }
+  tree.println("NUMBER, MM, TYPE, CATEGORY, TIME");
+  tree.close(); 
+}
 
 void loop()
 {
@@ -383,7 +408,9 @@ void loop()
     case CHEK_CATEGORY:
       break;
     case LOAD_DATA:
-      file_write(data_mm, num_tree, num_category);
+      tree = SD.open("tree.csv", FILE_WRITE);
+      file_write(tree, data_mm, num_tree, num_category);
+      tree.close();
       break;
   }
 
