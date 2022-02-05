@@ -332,18 +332,29 @@ void setup()
   TCCR5B |= (1 << CS12);
 
   TIMSK5 |= (1 << OCIE1A);  // включить прерывание по совпадению таймера
-  /*
+  
   TCCR4A = 0;   // установить регистры в 0
   TCCR4B = 0;
 
-  OCR4A = 10000; // установка регистра совпадения
+  OCR4A = 40000; // установка регистра совпадения
 
   TCCR4B |= (1 << WGM12);  // включить CTC режим
   TCCR4B |= (1 << CS10); // Установить биты на коэффициент деления 1024
   TCCR4B |= (1 << CS12);
 
-  TIMSK4 |= (1 << OCIE1A);  // включить прерывание по совпадению таймера
-  */
+  TIMSK4 |= (1 << OCIE4A);  // включить прерывание по совпадению таймера
+
+  TCCR3A = 0;   // установить регистры в 0
+  TCCR3B = 0;
+
+  OCR3A = 3; // установка регистра совпадения
+
+  TCCR3B |= (1 << WGM12);  // включить CTC режим
+  TCCR3B |= (1 << CS10); // Установить биты на коэффициент деления 1024
+  TCCR3B |= (1 << CS12);
+
+  TIMSK3 |= (1 << OCIE3A);  // включить прерывание по совпадению таймера
+  
   sei();
   
   pinMode(10, OUTPUT);
@@ -365,31 +376,14 @@ void loop()
   switch (state)
   {
     case GET_MM:
-      value_mm = get_mm();
-      digitalWrite(led_green,  1);
-      digitalWrite(led_red,    0);
-      digitalWrite(led_blue,   0);
-      digitalWrite(led_yellow, 0);
       break;
     case CHEK_NAME:
       data_mm = value_mm;
-      digitalWrite(led_green,  0);
-      digitalWrite(led_red,    0);
-      digitalWrite(led_blue,   0);
-      digitalWrite(led_yellow, 1);
       break;
     case CHEK_CATEGORY:
-      digitalWrite(led_green,  0);
-      digitalWrite(led_red,    0);
-      digitalWrite(led_blue,   1);
-      digitalWrite(led_yellow, 0);
       break;
     case LOAD_DATA:
       file_write(data_mm, num_tree, num_category);
-      digitalWrite(led_green,  0);
-      digitalWrite(led_red,    1);
-      digitalWrite(led_blue,   0);
-      digitalWrite(led_yellow, 0);
       break;
   }
 
@@ -398,6 +392,7 @@ void loop()
 ISR(TIMER5_COMPA_vect)
 {
  cli();
+ uint8_t oldSREG = SREG;
   if (state == GET_MM)
   {
     //value_mm = get_mm();
@@ -415,15 +410,53 @@ ISR(TIMER5_COMPA_vect)
   {
 
   }
+  SREG = oldSREG;
   sei();
 }
 
 ISR(TIMER4_COMPA_vect)
 {
+  uint8_t oldSREG = SREG;
   if(state == GET_MM)
   {
     value_mm = get_mm();
   }
+  SREG = oldSREG;
+}
+
+ISR(TIMER3_COMPA_vect)
+{
+  cli();
+  uint8_t oldSREG = SREG;
+  switch (state)
+  {
+    case GET_MM:
+      digitalWrite(led_green,  1);
+      digitalWrite(led_red,    0);
+      digitalWrite(led_blue,   0);
+      digitalWrite(led_yellow, 0);
+      break;
+    case CHEK_NAME:
+      digitalWrite(led_green,  0);
+      digitalWrite(led_red,    0);
+      digitalWrite(led_blue,   0);
+      digitalWrite(led_yellow, 1);
+      break;
+    case CHEK_CATEGORY:
+      digitalWrite(led_green,  0);
+      digitalWrite(led_red,    0);
+      digitalWrite(led_blue,   1);
+      digitalWrite(led_yellow, 0);
+      break;
+    case LOAD_DATA:
+      digitalWrite(led_green,  0);
+      digitalWrite(led_red,    1);
+      digitalWrite(led_blue,   0);
+      digitalWrite(led_yellow, 0);
+      break;
+  }
+  SREG = oldSREG;
+  sei();
 }
 
 void pre_state()
