@@ -1,12 +1,13 @@
 // Укажем, что к каким пинам подключено
 int trigPin = 2;
 int echoPin = 3;
-
-void setup() {
+unsigned long t;
+void setup() 
+{
   Serial.begin (115200);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  //t = millis();
+  t = millis();
 }
 unsigned long  sen_dur;
 int sen_dir[100];
@@ -34,7 +35,6 @@ void loop()
     sen_dur += duration;
     sen_dir[i] = duration;
   }
-   
   min_dur = sen_dir[0];
   max_dur = sen_dir[0];
   for(int i = 0; i < 100; i++)

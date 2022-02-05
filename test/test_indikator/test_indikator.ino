@@ -1,7 +1,7 @@
-#define led_green   53
-#define led_red     51
-#define led_blue    49
-#define led_yellow  47
+#define led_green   8
+#define led_red     9
+#define led_blue    10
+#define led_yellow  11
 
 #define buttom1     3
 #define buttom2     2
@@ -31,18 +31,19 @@
 #define CHEK_CATEGORY 2
 #define LOAD_DATA     3
 
-#define BERS 3210
-#define OCIN 7654
-#define ELKA 9781
-#define LIPA 9268
-#define COCN 7545
+const int trigPin = 6;
+const int echoPin = 7;
 
-#include <Wire.h>
-#include <VL53L0X.h>
+//#include <NewPing.h>
 
-VL53L0X sensor;
+//NewPing sonar(trigPin, echoPin, 65);
 
-int list_trees[5] = {BERS, OCIN, ELKA, LIPA, COCN};
+#include <SPI.h>
+#include <SD.h>
+
+const int PIN_CHIP_SELECT = 53;
+
+File tree;
 
 uint32_t dividers[8] = {
   1000,
@@ -259,29 +260,61 @@ void setup_encoder()
   pinMode(encoder_key, INPUT);
 }
 
-uint32_t t = 0;
+void setup_metr()
+{
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+int get_mm()
+{
+  
+  int mm;
+  unsigned long sen_dur = 0;
+  sen_dur = 0;
+  for(int i = 0; i < 100; i++)
+  {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    // Теперь установим высокий уровень на пине Trig
+    digitalWrite(trigPin, HIGH);
+    // Подождем 10 μs
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    
+    sen_dur += pulseIn(echoPin, HIGH, 5000);
+  }
+  sen_dur = sen_dur / 100;
+  
+  if(sen_dur > 620)
+  {
+    //mm = 0.00028671 * sen_dur * sen_dur + 5.44540188 * sen_dur + 117.17137;
+    mm = (-5.44540188 + sqrt(5.44540188 * 5.4450188 - 4 * 0.00028671 * (117.17137 - sen_dur))) / (2 * 0.00028671);
+  }
+  else
+  {
+    mm = sen_dur / 5.8;
+  }
+ 
+  return mm;
+}
+
+void file_write(int mm, int tree, int category)
+{
+  
+}
+
+unsigned long t, pre_millis = 0;
 
 void setup()
 {
   setup_led();
   setup_indicator();
   setup_buttom();
+  //setup_metr();
+  
   Serial.begin(9600);
   t = millis();
-  Wire.begin();
-
-  sensor.setTimeout(500);
-
-  
-
-
-  sensor.setSignalRateLimit(0.1);
-  sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
-  sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 14);
-
-  sensor.setMeasurementTimingBudget(20000);
-  sensor.setMeasurementTimingBudget(200000);
-
   attachInterrupt(digitalPinToInterrupt(buttom4), next_state, FALLING);
   attachInterrupt(digitalPinToInterrupt(buttom3), pre_state, FALLING);
 
@@ -289,37 +322,57 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(buttom2), pre_count, FALLING);
 
   cli();  // отключить глобальные прерывания
-  TCCR1A = 0;   // установить регистры в 0
-  TCCR1B = 0;
+  TCCR5A = 0;   // установить регистры в 0
+  TCCR5B = 0;
 
-  OCR1A = 80; // установка регистра совпадения
+  OCR5A = 80; // установка регистра совпадения
 
-  TCCR1B |= (1 << WGM12);  // включить CTC режим
-  TCCR1B |= (1 << CS10); // Установить биты на коэффициент деления 1024
-  TCCR1B |= (1 << CS12);
+  TCCR5B |= (1 << WGM12);  // включить CTC режим
+  TCCR5B |= (1 << CS10); // Установить биты на коэффициент деления 1024
+  TCCR5B |= (1 << CS12);
 
-  TIMSK1 |= (1 << OCIE1A);  // включить прерывание по совпадению таймера
+  TIMSK5 |= (1 << OCIE1A);  // включить прерывание по совпадению таймера
+  /*
+  TCCR4A = 0;   // установить регистры в 0
+  TCCR4B = 0;
 
+  OCR4A = 10000; // установка регистра совпадения
+
+  TCCR4B |= (1 << WGM12);  // включить CTC режим
+  TCCR4B |= (1 << CS10); // Установить биты на коэффициент деления 1024
+  TCCR4B |= (1 << CS12);
+
+  TIMSK4 |= (1 << OCIE1A);  // включить прерывание по совпадению таймера
+  */
   sei();
-
+  
+  pinMode(10, OUTPUT);
+  /* Дописать потом сейчас лень
+  // Пытаемся проинициализировать модуль
+  if (!SD.begin(PIN_CHIP_SELECT)) {
+    Serial.println("Card failed, or not present");
+    // Если что-то пошло не так, завершаем работу:
+    while(1);
+  }
+  Serial.println("card initialized.");
+  */
 }
 
-int num_tree, num_category, next, state, value_mm = 0;
+int num_tree, num_category, next, state, value_mm, data_mm = 0;
 
 void loop()
 {
-  value_mm = 400;
-  Serial.println(next);
-  
   switch (state)
   {
     case GET_MM:
+      value_mm = get_mm();
       digitalWrite(led_green,  1);
       digitalWrite(led_red,    0);
       digitalWrite(led_blue,   0);
       digitalWrite(led_yellow, 0);
       break;
     case CHEK_NAME:
+      data_mm = value_mm;
       digitalWrite(led_green,  0);
       digitalWrite(led_red,    0);
       digitalWrite(led_blue,   0);
@@ -332,6 +385,7 @@ void loop()
       digitalWrite(led_yellow, 0);
       break;
     case LOAD_DATA:
+      file_write(data_mm, num_tree, num_category);
       digitalWrite(led_green,  0);
       digitalWrite(led_red,    1);
       digitalWrite(led_blue,   0);
@@ -341,11 +395,12 @@ void loop()
 
 }
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER5_COMPA_vect)
 {
- 
+ cli();
   if (state == GET_MM)
   {
+    //value_mm = get_mm();
     displayAnyValue(value_mm);
   }
   else if (state == CHEK_NAME)
@@ -360,7 +415,15 @@ ISR(TIMER1_COMPA_vect)
   {
 
   }
+  sei();
+}
 
+ISR(TIMER4_COMPA_vect)
+{
+  if(state == GET_MM)
+  {
+    value_mm = get_mm();
+  }
 }
 
 void pre_state()
