@@ -1,30 +1,35 @@
-#define led_green   8
+#define led_green   11
 #define led_red     9
-#define led_blue    10
-#define led_yellow  11
+#define led_blue    8
+#define led_yellow  10
 
-#define buttom1     3
-#define buttom2     2
-#define buttom3     18
-#define buttom4     19
+#define buttom2     A9
+#define buttom3     A8
+#define buttom4     A7
+#define buttom5     A6
 
-#define encoder_s1  52
-#define encoder_s2  50
-#define encoder_key 48
+#define pin1  44
+#define pin2  42
+#define pin3  41
+#define pin4  40
+#define pin5  39
+#define pin6  38
+#define pin7  37
+#define pin8  36
+#define pin9  35
+#define pin10 34
+#define pin11 33
+#define pin12 32
+#define pin13 A11
+#define pin14 A12
+#define pin15 A13
+#define pin16 A14
+#define pin17 A15
 
-#define pin_A       44
-#define pin_B       42
-#define pin_C       40
-#define pin_D       38
-#define pin_E       36
-#define pin_F       34
-#define pin_G       33
-#define pin_DT      31
-
-#define D1          29
-#define D2          27
-#define D3          25
-#define D4          23
+#define D1          45
+#define D2          43
+#define D3          46
+#define D4          49
 
 #define GET_MM        0
 #define CHEK_NAME     1
@@ -50,15 +55,15 @@ uint32_t dividers[8] = {
   1
 };
 
-int digits [10][11] = {{  A15,  38, 42, 40, 36, 33, A12, 32, 0},      //0
+int digits [10][17] = {{  A15, 38, 37, A14, A12, 32, 0},      //0
   { 44,  40, 36, 0},                   //1
   { 38,  42, 40, 41, A11, 32, A12, 33, 0},         //2
   { 38,  42, 40, 36, 33, A12, 41, A11, 0},         //3
   {A15,  A11, 41, 40, 36, 0},             //4
   { 42,  38, A15, A11, 41, 36, 33, A12, 0},         //5
-  { 42,  38, A14, 32, A12, 33, 36, 41, A11, 0},     //6
+  { 42,  38, A15, 32, A12, 33, 36, 41, A11, 0},     //6
   { 38,  42, 44, A13, 0},            //7
-  { 38,  42, 40, 36, 33, A12, 32, A15, A11, 41, 0},  //8
+  {A15, 38, 37, A14, A12, 32, A11, 0},  //8
   { 41,  A11, A15, 38, 42, 40, 36, 33, A12, 0}};     //9
 
 int positions[4] = {
@@ -69,31 +74,30 @@ const char* trees_names[19] = {"Сосна", "Ель", "Пихта", "Листв
 const char* category_names[3] = {"Деловые", "Полуделовые", "Дровяные"};
 int num_tree, num_category, next, state, value_mm, data_mm = 0;
 
-int trees[19][4][11] =  {{{0},                              {42, 38, A15, A11, 41, 36, 33, A12, 0},      {A15,  38, 42, 40, 36, 33, A12, 32, 0}, {A15, 38, 37, A14, A12, 32, 0}},     //SOS - сосна
+int trees[19][4][17] =  {{{0},                              {42, 38, A15, A11, 41, 36, 33, A12, 0},      {A15, 38, 37, A14, A12, 32, 0}, {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //SOS - сосна
                         {{0},                               {0},                                         {42, 38, A15, A11, 41, 32, A12, 33, 0}, {A15, 32, A12, 33, 0}},            //EL - ель
                         {{A11, 41, 40, 42, 38, A15, 32, 0}, {38, 42, 37, A14, A12, 33, 0},               {42, 38, A15, 32, A12, 33, 0},          {A15, 32, A11, 41, 40, 36, 0}},     //PICH - пихта
                         {{A15, 32, A12, 33, 0},             {38, 42, 37, A14, A12, 33, 0},               {42, 38, A15, A11, 41, 36, 33, A12, 0}, {38, 42, 37, A14, 0}},             //LIST - лиственница
-                        {{0},                               {0},                                         {0},                                    {A15, 32, 44, 35, A11, 0}},     //K - кедр
+                        {{0},                               {0},                                         {0},                                    {A15, 32, 44, 35, A11, 37, 0}},     //K - кедр
                         {{0},                               {44,  42, 38, A15, A11, 32, A12, 33, 35, 0}, {42, 38, A15, A11, 41, 32, A12, 33, 0}, {44, 42, 38, A15, 32, A11, 35, 0}}, //BER - берёза
                         {{0},                               {0},                                         {A15, 38, 37, A14, A12, 32, 0},         {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //OS - осина
                         {{0},                               {A15, 38, 37, A14, A12, 32, 0},      {A15, 32, A12, 33, 0},                  {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //OLS - ольха серая
                         {{0},                           {0},                          {A15, 32, A12, 33, 0},                      {A11, 41, 40, 42, 38, A15, 32, 0}},     //LP - липа
                         {{0},                           {38, 42, 37, A14, A12, 33, 0},{A15, 32, A12, 33, 36, 40, 0},              {32, A15, 38, 43, 40, 36, 41, A11, 0}}, //IVA - ива дреновидная
-                        {{0},                           {39, 44, A14, 0},             {32, A15, 38, 43, 40, 36, 41, A11, 0},      {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //YAS - ясень
-                        {{0},                           {0},                          {A15, 32, 44, 35, A11, 0},                  {A15, 32, A12, 33, 0}},            //KL - клён
+                        {{0},                           {39, 44, A14, 37, 0},             {32, A15, 38, 43, 40, 36, 41, A11, 0},      {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //YAS - ясень
+                        {{0},                           {0},                          {A15, 32, 44, 35, A11, 37, 0},                  {A15, 32, A12, 33, 0}},            //KL - клён
                         {{0},                           {0},                          {0},                                        {A15, 32, A12, 33, 36, 40, 0}},     //V - вяз
                         {{0},                           {38, 42, 37, A14, A12, 33, 0},{A15, 32, A12, 33, 0},                      {32, A15, 39, 44, 40, 36, 0}},     //ILM - ильм
-                        {{0},                           {0},                          {0},                                        {42, 38, A15, A11, 41, 36, 33, A12, 0}}, //D - дуб
-                        {{0},                           {0},                          {44,  42, 38, A15, A11, 32, A12, 33, 35, 0},{A15, 32, 44, 35, A11, 0}},     //BK - бук
+                        {{0},                           {0},                          {0},                                        {A15,  38, 42, 40, 36, 33, A12, 32, 0}}, //D - дуб
+                        {{0},                           {0},                          {44,  42, 38, A15, A11, 32, A12, 33, 35, 0},{A15, 32, 44, 35, A11, 37, 0}},     //BK - бук
                         {{0},                           {0},                          {44, 42, 38, A15, 32, A12, 33, 35, 0},      {44, 42, 38, A15, 32, A11, 35, 0}}, //GR - граб
                         {{A15, 38, 37, A14, A12, 32, 0},{A15, 32, A12, 33, 0},        {42, 38, A15, 32, A12, 33, 0},              {A15, 32, A11, 41, 40, 36, 0}},     //OLCH - ольха чёрная
                         {{0},                           {38, 42, 37, A14, 0},         {A15, 38, 37, A14, A12, 32, 0},             {A11, 41, 40, 42, 38, A15, 32, 0}}};    //TOP - тополь
 
-int category_tech[3][4][12] = {{{0}, {0}, {0},                              {42, 38, A15, A11, 41, 36, 33, A12, 0}}, //D  - Деловые
-                              {{0}, {0}, {A11, 41, 40, 42, 38, A15, 32, 0},    {42, 38, A15, A11, 41, 36, 33, A12, 0}}, //PD - Полуделовые
-                              {{0}, {0}, {42, 38, A15, A11, 41, 36, 33, A12, 0}, {44, 42, 38, A15, 32, A11, 35, 0}}   //DR - Дрова
-};
-
+int category_tech[3][4][11] = {{{0}, {0}, {0},                              {A15,  38, 42, 40, 36, 33, A12, 32, 0}}, //D  - Деловые
+                              {{0}, {0}, {A11, 41, 40, 42, 38, A15, 32, 0},    {A15,  38, 42, 40, 36, 33, A12, 32, 0}}, //PD - Полуделовые
+                              {{0}, {0}, {A15,  38, 42, 40, 36, 33, A12, 32, 0}, {44, 42, 38, A15, 32, A11, 35, 0}}   //DR - Дрова
+};  
 int old_trees[10][8] = {  {  44, 40, 38, 36, 33, 31, 0},      //Б/1
   { 44,  40, 38, 31, 33, 0},                   //Е/2
   { 44,  38, 42,  31, 40, 0},         //Р/3
@@ -137,7 +141,7 @@ void displayTree(uint32_t pos)
   {
     digitalWrite(positions[i], 0);
     clean_digits();
-    for (int j = 0; j < 8; j++)
+    for (int j = 0; j < 17; j++)
     {
       if (trees[pos][i][j] != 0)
       {
@@ -148,7 +152,7 @@ void displayTree(uint32_t pos)
         break;
       }
     }
-    delay(4);
+    delay(5);
     digitalWrite(positions[i], 1);
   }
 }
@@ -178,6 +182,7 @@ void displayCategory(uint32_t pos)
 void displayAnyValue(uint32_t x)
 {
   int digit = 0;
+
   if (x <= 99)
   {
     for (int i = 2; i < 4; i++)
@@ -186,7 +191,7 @@ void displayAnyValue(uint32_t x)
       digitalWrite(positions[i], 0);
       displayDigit(digit, i);
       x = x % dividers[i];
-      delay(4);
+      
       digitalWrite(positions[i], 1);
     }
   }
@@ -198,7 +203,7 @@ void displayAnyValue(uint32_t x)
       digitalWrite(positions[i], 0);
       displayDigit(digit, i);
       x = x % dividers[i];
-      delay(4);
+      //delay(4);
       digitalWrite(positions[i], 1);
     }
   }
@@ -210,7 +215,7 @@ void displayAnyValue(uint32_t x)
       digitalWrite(positions[i], 0);
       displayDigit(digit, i);
       x = x % dividers[i];
-      delay(4);
+      //delay(8);
       digitalWrite(positions[i], 1);
     }
   }
@@ -219,10 +224,11 @@ void displayAnyValue(uint32_t x)
 void displayDigit(int digit, int pos)
 {
   clean_digits();
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < 17; i++)
   {
     if (digits[digit][i] != 0)
     {
+      //digitalWrite(42, 1);
       digitalWrite(digits[digit][i], 1);
     }
     else
@@ -234,14 +240,33 @@ void displayDigit(int digit, int pos)
   {
     digitalWrite(34, 1);
   }
+  delay(5);
+}
+
+
+
+void clean_d()
+{
+  digitalWrite(d3, 0);
+  digitalWrite(d4, 0);
+  digitalWrite(d1, 0);
+  digitalWrite(d2, 0);
+}
+
+void setup_metr()
+{
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
 void setup_buttom()
 {
-  pinMode(buttom1,     INPUT_PULLUP);
   pinMode(buttom2,     INPUT_PULLUP);
   pinMode(buttom3,     INPUT_PULLUP);
   pinMode(buttom4,     INPUT_PULLUP);
+  pinMode(buttom5,     INPUT_PULLUP);
+
+  pinMode(inter_buttom_pin, INPUT);
 }
 
 void setup_led()
@@ -265,25 +290,12 @@ void setup_indicator()
   pinMode(A15, OUTPUT);
   pinMode(49, OUTPUT);
 
-  for (int i = 0; i < 8; i++) digitalWrite(arr_pin_indicator[i], 0);
+  clean_digits();
 
   digitalWrite(45, 1);
   digitalWrite(43, 1);
   digitalWrite(46, 1);
   digitalWrite(49, 1);
-}
-
-void setup_encoder()
-{
-  pinMode(encoder_s1,  INPUT);
-  pinMode(encoder_s2,  INPUT);
-  pinMode(encoder_key, INPUT);
-}
-
-void setup_metr()
-{
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
 }
 
 int get_mm()
@@ -336,22 +348,33 @@ void file_write(File tree, int mm, int tree_num, int category)
   sei();
 }
 
-unsigned long t, pre_millis = 0;
+unsigned long t, pre_millis, count = 0;
+
+void card_pannic()
+{
+  analogWrite(led_red, 10);
+  analogWrite(led_green, 10);
+  analogWrite(led_blue, 10);
+  analogWrite(led_yellow, 10);
+  delay(1000);
+  digitalWrite(led_red, 0);
+  digitalWrite(led_green, 0);
+  digitalWrite(led_blue, 0);
+  digitalWrite(led_yellow, 0);
+  delay(1000);
+}
 
 void setup()
 {
   setup_led();
   setup_indicator();
   setup_buttom();
-  //setup_metr();
-  /*
-  Serial.begin(9600);
+  setup_metr();
+  
+  //Serial.begin(9600);
   t = millis();
-  attachInterrupt(digitalPinToInterrupt(buttom4), next_state, FALLING);
-  attachInterrupt(digitalPinToInterrupt(buttom3), pre_state, FALLING);
-
-  attachInterrupt(digitalPinToInterrupt(buttom1), next_count, FALLING);
-  attachInterrupt(digitalPinToInterrupt(buttom2), pre_count, FALLING);
+  attachInterrupt(digitalPinToInterrupt(inter_buttom_pin), chek_buttom, FALLING);
+ 
 
   cli();  // отключить глобальные прерывания
   TCCR5A = 0;   // установить регистры в 0
@@ -390,7 +413,7 @@ void setup()
   sei();
   
   pinMode(10, OUTPUT);
-  /* Сделать исключительну. ситуацию когда карта не вставлена
+  // Сделать исключительну. ситуацию когда карта не вставлена
   // Пытаемся проинициализировать модуль
   if (!SD.begin(PIN_CHIP_SELECT)) {
     Serial.println("Card failed, or not present");
@@ -412,13 +435,11 @@ void setup()
   }
   tree.println("NUMBER, MM, TYPE, CATEGORY, TIME");
   tree.close(); 
-  */
+  
 }
 
 void loop()
 {
-  displayAnyValue(8888);
-  /*
   switch (state)
   {
     case GET_MM:
@@ -434,7 +455,6 @@ void loop()
       tree.close();
       break;
   }
-  */
 }
 
 ISR(TIMER5_COMPA_vect)
@@ -479,7 +499,7 @@ ISR(TIMER3_COMPA_vect)
   switch (state)
   {
     case GET_MM:
-      digitalWrite(led_green,  1);
+      analogWrite(led_green,  10);
       digitalWrite(led_red,    0);
       digitalWrite(led_blue,   0);
       digitalWrite(led_yellow, 0);
@@ -488,23 +508,112 @@ ISR(TIMER3_COMPA_vect)
       digitalWrite(led_green,  0);
       digitalWrite(led_red,    0);
       digitalWrite(led_blue,   0);
-      digitalWrite(led_yellow, 1);
+      analogWrite(led_yellow, 10);
       break;
     case CHEK_CATEGORY:
       digitalWrite(led_green,  0);
       digitalWrite(led_red,    0);
-      digitalWrite(led_blue,   1);
+      analogWrite(led_blue,   10);
       digitalWrite(led_yellow, 0);
       break;
     case LOAD_DATA:
       digitalWrite(led_green,  0);
-      digitalWrite(led_red,    1);
+      analogWrite(led_red,    10);
       digitalWrite(led_blue,   0);
       digitalWrite(led_yellow, 0);
       break;
   }
   SREG = oldSREG;
   sei();
+}
+
+void chek_buttom()
+{
+  if(!digitalRead(buttom5))
+  {
+    count = 0;
+    switch(state)
+    {
+      case GET_MM:
+      break;
+    case CHEK_NAME:
+      if (num_tree > 0)
+      {
+        num_tree++;
+      }
+      else
+      {
+        num_tree = 0;
+      }
+      break;
+    case CHEK_CATEGORY:
+      if (num_category < 2)
+      {
+        num_category++;
+      }
+      else
+      {
+        num_category = 0; 
+      }
+      break;
+    case LOAD_DATA:
+      break;
+    }
+  }
+  else if(!digitalRead(buttom3))
+  {
+    count = 0;
+    switch(state)
+    {
+      case GET_MM:
+      break;
+    case CHEK_NAME:
+      if (num_tree > 0)
+      {
+        num_tree--;
+      }
+      else
+      {
+        num_tree = 18;
+      }
+      break;
+    case CHEK_CATEGORY:
+      if (num_category > 0)
+      {
+        num_category--;
+      }
+      else
+      {
+        num_category = 2;
+      }
+      break;
+    
+    case LOAD_DATA:
+      break;
+    }
+  }
+  else if(!digitalRead(buttom2))
+  {
+    if (state != GET_MM)
+    {
+      state--;
+    }
+    else
+    { 
+      state = 0;
+    }
+  }
+  else if(!digitalRead(buttom4))
+  {
+    if (state != LOAD_DATA)
+    {
+      state++;
+    }
+    else
+    {
+      state = 0;
+    }
+  }
 }
 
 void pre_state()
