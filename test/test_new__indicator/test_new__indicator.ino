@@ -19,13 +19,18 @@
 #define pin14 A12
 #define pin15 A13
 #define pin16 A14
-#define pin17  A15
+#define pin17 A15
 
 #define buttom1 A10
 #define buttom2 A9
 #define buttom3 A8
 #define buttom4 A7
 #define buttom5 A6
+
+#define led_blue 8
+#define led_red 9
+#define led_yellow 10
+#define led_green 11
 
 #define inter_buttom_pin 2
 
@@ -277,7 +282,7 @@ void setup()
   pinMode(A12, OUTPUT);
   pinMode(A13, OUTPUT);
   pinMode(A14, OUTPUT);
-  pinMode(A15, OUTPUT);
+  pinMode(pin17, OUTPUT);
   pinMode(49, OUTPUT);
   Serial.begin(9600);
   digitalWrite(d3, 1);
@@ -291,27 +296,30 @@ void setup()
   pinMode(buttom4, INPUT_PULLUP);
   pinMode(buttom5, INPUT_PULLUP);
 
-  pinMode(inter_buttom_pin, INPUT_PULLUP);
+  pinMode(inter_buttom_pin, INPUT);
 
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
-  
+  attachInterrupt(digitalPinToInterrupt(inter_buttom_pin), chek_buttom, FALLING);
 }
 
 long mm = 0;
 
 void loop() 
 {
-  Serial.println(get_mm());
-  //analogWrite(8, 10);
-  //analogWrite(9, 10);
+  //Serial.println(get_mm());
+
+  //digitalWrite(led_red, 1);
+  
+  analogWrite(8, 10);
+  analogWrite(9, 10);
   //analogWrite(10, 10);
   //analogWrite(11, 10);
-  //displayAnyValue(6);
+  //displayAnyValue(9999);
   //displayCategory(2);
-  //displayTree(0);
+  //displayTree(2);
   //clean_digits();
   //digitalWrite(d3, 1);
   //digitalWrite(d4, 1);
@@ -358,5 +366,24 @@ void loop()
   digitalWrite(d2, 0);
   */
   //delay(500);
-  
+}
+
+void chek_buttom()
+{
+  if(!digitalRead(buttom5))
+  {
+    digitalWrite(8, !digitalRead(8));
+  }
+  else if(!digitalRead(buttom3))
+  {
+    digitalWrite(9, !digitalRead(9));
+  }
+  else if(!digitalRead(buttom2))
+  {
+    digitalWrite(10, !digitalRead(10));
+  }
+  else if(!digitalRead(buttom4))
+  {
+    digitalWrite(11, !digitalRead(11));
+  }
 }
