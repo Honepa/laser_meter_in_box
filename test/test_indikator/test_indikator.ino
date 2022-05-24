@@ -8,6 +8,8 @@
 #define buttom4     A7
 #define buttom5     A6
 
+#define inter_buttom_pin 2
+
 #define pin1  44
 #define pin2  42
 #define pin3  41
@@ -26,10 +28,10 @@
 #define pin16 A14
 #define pin17 A15
 
-#define D1          45
-#define D2          43
-#define D3          46
-#define D4          49
+#define d1          45
+#define d2          43
+#define d3          46
+#define d4          49
 
 #define GET_MM        0
 #define CHEK_NAME     1
@@ -54,8 +56,8 @@ uint32_t dividers[8] = {
   10,
   1
 };
-
-int digits [10][17] = {{  A15, 38, 37, A14, A12, 32, 0},      //0
+//  A15, 38, 37, A14, A12, 32, 0 - reserve "zero"
+int digits [10][17] = {{A15,  38, 42, 40, 36, 33, A12, 32, 0},      //0
   { 44,  40, 36, 0},                   //1
   { 38,  42, 40, 41, A11, 32, A12, 33, 0},         //2
   { 38,  42, 40, 36, 33, A12, 41, A11, 0},         //3
@@ -96,7 +98,7 @@ int trees[19][4][17] =  {{{0},                              {42, 38, A15, A11, 4
 
 int category_tech[3][4][11] = {{{0}, {0}, {0},                              {A15,  38, 42, 40, 36, 33, A12, 32, 0}}, //D  - Деловые
                               {{0}, {0}, {A11, 41, 40, 42, 38, A15, 32, 0},    {A15,  38, 42, 40, 36, 33, A12, 32, 0}}, //PD - Полуделовые
-                              {{0}, {0}, {A15,  38, 42, 40, 36, 33, A12, 32, 0}, {44, 42, 38, A15, 32, A11, 35, 0}}   //DR - Дрова
+                              {{0}, {0}, {A15,  38, 42, 40, 36, 33, A12, 32, 0}, {42, 38, A15, 32, A11, 35, 40, 41,0}}   //DR - Дрова
 };  
 int old_trees[10][8] = {  {  44, 40, 38, 36, 33, 31, 0},      //Б/1
   { 44,  40, 38, 31, 33, 0},                   //Е/2
@@ -418,7 +420,10 @@ void setup()
   if (!SD.begin(PIN_CHIP_SELECT)) {
     Serial.println("Card failed, or not present");
     // Если что-то пошло не так, завершаем работу:
-    while(1);
+    while(1)
+    {
+      card_pannic();
+    }
   }
   Serial.println("card initialized.");
   
@@ -433,7 +438,7 @@ void setup()
   {
     tree = SD.open("tree.csv", FILE_WRITE);
   }
-  tree.println("NUMBER, MM, TYPE, CATEGORY, TIME");
+  tree.println("NUMBER, MM, TYPE, CATEGORY");
   tree.close(); 
   
 }
@@ -513,7 +518,7 @@ ISR(TIMER3_COMPA_vect)
     case CHEK_CATEGORY:
       digitalWrite(led_green,  0);
       digitalWrite(led_red,    0);
-      analogWrite(led_blue,   10);
+      analogWrite(led_blue,   250);
       digitalWrite(led_yellow, 0);
       break;
     case LOAD_DATA:
@@ -537,7 +542,7 @@ void chek_buttom()
       case GET_MM:
       break;
     case CHEK_NAME:
-      if (num_tree > 0)
+      if (num_tree < 18)
       {
         num_tree++;
       }
@@ -615,7 +620,7 @@ void chek_buttom()
     }
   }
 }
-
+/*
 void pre_state()
 {
   if (state != GET_MM)
@@ -787,3 +792,4 @@ void pre_count()
     }
   }
 }
+*/
