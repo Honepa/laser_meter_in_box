@@ -306,7 +306,7 @@ int get_mm()
   int mm;
   unsigned long sen_dur = 0;
   sen_dur = 0;
-  for(int i = 0; i < 100; i++)
+  for(int i = 0; i < 10; i++)
   {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -318,18 +318,11 @@ int get_mm()
     
     sen_dur += pulseIn(echoPin, HIGH, 5000);
   }
-  sen_dur = sen_dur / 100;
+  sen_dur = sen_dur / 10;
   
-  if(sen_dur > 620)
-  {
-    //mm = 0.00028671 * sen_dur * sen_dur + 5.44540188 * sen_dur + 117.17137;
-    mm = (-5.44540188 + sqrt(5.44540188 * 5.4450188 - 4 * 0.00028671 * (117.17137 - sen_dur))) / (2 * 0.00028671);
-  }
-  else
-  {
-    mm = sen_dur / 5.8;
-  }
- 
+  //mm = -0.0000000012 * sen_dur * sen_dur * sen_dur + 0.0000055960 * sen_dur * sen_dur + 0.1684855573 * sen_dur + 2.1637445582;
+  mm = sen_dur / 5.8;
+  //mm = 0.0012 * sen_dur * sen_dur  - 0.1737 * sen_dur + 1.0080;
   return mm;
 }
 
@@ -455,9 +448,12 @@ void loop()
     case CHEK_CATEGORY:
       break;
     case LOAD_DATA:
+      cli();
       tree = SD.open("tree.csv", FILE_WRITE);
       file_write(tree, data_mm, num_tree, num_category);
       tree.close();
+      state = GET_MM;
+      sei();
       break;
   }
 }

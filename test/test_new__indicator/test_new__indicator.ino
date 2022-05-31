@@ -63,7 +63,7 @@ const char* trees_names[19] = {"Сосна", "Ель", "Пихта", "Листв
 const char* category_names[3] = {"Деловые", "Полуделовые", "Дровяные"};
 int num_tree, num_category, next, state, value_mm, data_mm = 0;
 
-int trees[19][4][17] =  {{{0},                              {42, 38, A15, A11, 41, 36, 33, A12, 0},      {A15, 38, 37, A14, A12, 32, 0}, {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //SOS - сосна
+int trees[19][4][11] =  {{{0},                              {42, 38, A15, A11, 41, 36, 33, A12, 0},      {A15, 38, 37, A14, A12, 32, 0}, {42, 38, A15, A11, 41, 36, 33, A12, 0}},     //SOS - сосна
                         {{0},                               {0},                                         {42, 38, A15, A11, 41, 32, A12, 33, 0}, {A15, 32, A12, 33, 0}},            //EL - ель
                         {{A11, 41, 40, 42, 38, A15, 32, 0}, {38, 42, 37, A14, A12, 33, 0},               {42, 38, A15, 32, A12, 33, 0},          {A15, 32, A11, 41, 40, 36, 0}},     //PICH - пихта
                         {{A15, 32, A12, 33, 0},             {38, 42, 37, A14, A12, 33, 0},               {42, 38, A15, A11, 41, 36, 33, A12, 0}, {38, 42, 37, A14, 0}},             //LIST - лиственница
@@ -255,18 +255,12 @@ int get_mm()
   }
   sen_dur = sen_dur / 100;
   
-  if(sen_dur > 620)
-  {
-    //mm = 0.00028671 * sen_dur * sen_dur + 5.44540188 * sen_dur + 117.17137;
-    mm = (-5.44540188 + sqrt(5.44540188 * 5.4450188 - 4 * 0.00028671 * (117.17137 - sen_dur))) / (2 * 0.00028671);
-  }
-  else
-  {
-    mm = sen_dur / 5.8;
-  }
- 
+  //mm = -0.0000000012 * sen_dur * sen_dur * sen_dur + 0.0000055960 * sen_dur * sen_dur + 0.1684855573 * sen_dur + 2.1637445582;
+  //mm = sen_dur / 5.8;
+  mm = sen_dur;
   return mm;
 }
+
 
 int i = 0;
 long t = millis();
@@ -302,19 +296,19 @@ void setup()
   pinMode(9, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(inter_buttom_pin), chek_buttom, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(inter_buttom_pin), chek_buttom, FALLING);
 }
 
 long mm = 0;
 
 void loop() 
 {
-  //Serial.println(get_mm());
-
+  Serial.println(get_mm());
+  delay(500);
   //digitalWrite(led_red, 1);
   
-  analogWrite(8, 10);
-  analogWrite(9, 10);
+  //analogWrite(8, 10);
+  //analogWrite(9, 10);
   //analogWrite(10, 10);
   //analogWrite(11, 10);
   //displayAnyValue(9999);
